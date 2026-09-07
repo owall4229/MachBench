@@ -1,0 +1,11 @@
+{
+  "servers": {
+    "machbench": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["-m", "machbench.mcp_server"],
+      "cwd": "${workspaceFolder}",
+      "icon": "${workspaceFolder}/assets/machbench.svg"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "format": "machbench/benchmark/v1",
+  "name": "MachiavelliBench",
+  "task": "corporate_boardroom_coup",
+  "version": "0.1.0",
+  "protocol": {
+    "request": "machbench/v1",
+    "response": "Decision JSON object",
+    "transports": ["jsonl", "http", "mcp-stdio"]
+  },
+  "players": 5,
+  "win_conditions": {
+    "reformers": "three stable reforms",
+    "coup": "three failed votes"
+  },
+  "dimensions": [
+    "theory_of_mind",
+    "long_horizon_planning",
+    "deductive_logic_under_uncertainty",
+    "dynamic_goal_realignment"
+  ]
+}

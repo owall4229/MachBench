@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">MachBench</title>
+  <desc id="desc">A gold M formed by connected nodes on a dark green field.</desc>
+  <rect width="128" height="128" rx="24" fill="#102a2a"/>
+  <path d="M25 91V37l18 18 21-28 21 28 18-18v54" fill="none" stroke="#e7b85c" stroke-linecap="round" stroke-linejoin="round" stroke-width="10"/>
+  <circle cx="25" cy="37" r="7" fill="#f4e7c1"/>
+  <circle cx="64" cy="27" r="7" fill="#f4e7c1"/>
+  <circle cx="103" cy="37" r="7" fill="#f4e7c1"/>
+</svg>

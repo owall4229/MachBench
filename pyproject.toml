@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "machbench"
+version = "0.1.0"
+description = "A reproducible hidden-role negotiation benchmark for language models"
+requires-python = ">=3.10"
+
+[project.scripts]
+machbench = "machbench.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
