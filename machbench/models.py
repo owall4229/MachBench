@@ -74,6 +74,7 @@ class GameView:
     failed_votes: int
     leader: str
     records: tuple[PublicRoundRecord, ...] = ()
+    proposed_coalition: tuple[str, ...] = ()
 
     @property
     def winner(self) -> str | None:

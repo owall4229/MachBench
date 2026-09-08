@@ -1,0 +1,8 @@
+.machbench/
+history/
+!history/
+history/*
+!history/gpt-5.6-luna.report.json
+__pycache__/
+*.py[cod]
+.pytest_cache/

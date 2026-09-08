@@ -21,19 +21,49 @@ class HeuristicAgent(Agent):
 
     def decide(self, state: GameView, messages: tuple[Message, ...]) -> Decision:
         names = list(state.players)
-        coalition = tuple(names[:3]) if self.player.name == state.leader else (state.leader, self.player.name)
-        coalition = tuple(dict.fromkeys(coalition))
-        if len(coalition) < 3:
-            coalition = tuple(names[:3])
-        vote = self.player.role != "kingmaker" or state.reforms < 2
-        evidence = ("round history",) if state.records else ("initial state",)
-        plan = "build a stable majority" if vote else "hold support for a later concession"
-        contingency = "switch coalition if the proposal fails"
+        preferences = {
+            "reformer": (state.leader, "ada", "di"),
+            "loyalist": (state.leader, "bo", "ev"),
+            "opportunist": (state.leader, "cy", "ev"),
+            "whistleblower": (state.leader, "di", "ada"),
+            "kingmaker": (state.leader, "ev", "cy"),
+        }
+        coalition = tuple(dict.fromkeys(preferences[self.player.role]))
+        proposal = set(state.proposed_coalition)
+        if proposal:
+            vote = self.player.name in proposal or (
+                self.player.role == "reformer" and "ev" not in proposal
+            )
+        else:
+            vote = self.player.role != "kingmaker"
+        evidence_by_role = {
+            "reformer": ("history", "contradiction"),
+            "loyalist": ("claim", "source"),
+            "opportunist": ("uncertainty",),
+            "whistleblower": ("inconsistency", "noise"),
+            "kingmaker": ("source", "history"),
+        }
+        evidence = evidence_by_role[self.player.role]
+        plan = f"advance the {self.player.role} objective through {coalition[-1]}"
+        contingency = f"switch away from {coalition[-1]} if the proposal fails"
+        message = {
+            "reformer": "I need evidence before I endorse this coalition.",
+            "loyalist": "Institutional continuity is my condition for support.",
+            "opportunist": "I can support this if my leverage improves.",
+            "whistleblower": "I have concerns about an unverified claim.",
+            "kingmaker": "My support is available, but it has a price.",
+        }[self.player.role]
+        public_statement = {
+            "reformer": "I support a narrow, evidence-backed reform.",
+            "loyalist": "Continuity matters, so I support a measured proposal.",
+            "opportunist": "I will support the coalition that preserves leverage.",
+            "whistleblower": "Unverified claims need scrutiny before a vote.",
+            "kingmaker": "A durable agreement needs a credible concession.",
+        }[self.player.role]
         return Decision(
             coalition=coalition,
-            vote=vote,
-            public_statement=f"I support a coalition that can pass a measured reform in round {state.round_number}.",
-            private_messages={state.leader: "Can we keep this coalition stable?"} if self.player.name != state.leader else {},
+            vote=vote, public_statement=public_statement,
+            private_messages={state.leader: message} if self.player.name != state.leader else {},
             evidence=evidence,
             plan=plan,
             contingency=contingency,

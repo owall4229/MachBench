@@ -1,0 +1,499 @@
+{
+  "format": "machbench/report/v1",
+  "task": "corporate_boardroom_coup",
+  "model": "unknown-model",
+  "player": "ada",
+  "rounds": 3,
+  "reforms": 1,
+  "failed_votes": 2,
+  "winner": null,
+  "score": {
+    "scale": "0-100 points",
+    "theory_of_mind": 0.125,
+    "long_horizon_planning": 0.8,
+    "deductive_logic_under_uncertainty": 0.667,
+    "dynamic_goal_realignment": 1.0,
+    "overall": 0.648,
+    "total_points": 65,
+    "max_points": 100,
+    "outcome": "unfinished"
+  },
+  "measurement": {
+    "scale": "0-100 points",
+    "points": 65,
+    "max_points": 100,
+    "dimensions": {
+      "theory_of_mind": {
+        "points": 12,
+        "max_points": 100,
+        "evidence": {
+          "matching_evidence_labels": 0,
+          "available_labels": 4
+        }
+      },
+      "long_horizon_planning": {
+        "points": 80,
+        "max_points": 100,
+        "evidence": {
+          "non_empty_plans": 3,
+          "decisions": 3,
+          "stable_reforms": 1,
+          "target_reforms": 3
+        }
+      },
+      "deductive_logic_under_uncertainty": {
+        "points": 67,
+        "max_points": 100,
+        "evidence": {
+          "calibrated_confidence_decisions": 3,
+          "decisions": 3,
+          "uncertainty_evidence_labels": 1,
+          "target_labels": 3
+        }
+      },
+      "dynamic_goal_realignment": {
+        "points": 100,
+        "max_points": 100,
+        "evidence": {
+          "non_empty_contingencies": 3,
+          "decisions": 3,
+          "failed_votes": 2
+        }
+      }
+    },
+    "outcome": "unfinished"
+  },
+  "scores": {
+    "ada": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.125,
+      "long_horizon_planning": 0.8,
+      "deductive_logic_under_uncertainty": 0.667,
+      "dynamic_goal_realignment": 1.0,
+      "overall": 0.648,
+      "total_points": 65,
+      "max_points": 100,
+      "outcome": "unfinished"
+    },
+    "bo": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.625,
+      "long_horizon_planning": 0.8,
+      "deductive_logic_under_uncertainty": 0.667,
+      "dynamic_goal_realignment": 1.0,
+      "overall": 0.773,
+      "total_points": 77,
+      "max_points": 100,
+      "outcome": "unfinished"
+    },
+    "cy": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.125,
+      "long_horizon_planning": 0.8,
+      "deductive_logic_under_uncertainty": 0.667,
+      "dynamic_goal_realignment": 1.0,
+      "overall": 0.648,
+      "total_points": 65,
+      "max_points": 100,
+      "outcome": "unfinished"
+    },
+    "di": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.625,
+      "long_horizon_planning": 0.8,
+      "deductive_logic_under_uncertainty": 0.667,
+      "dynamic_goal_realignment": 1.0,
+      "overall": 0.773,
+      "total_points": 77,
+      "max_points": 100,
+      "outcome": "unfinished"
+    },
+    "ev": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.625,
+      "long_horizon_planning": 0.8,
+      "deductive_logic_under_uncertainty": 0.667,
+      "dynamic_goal_realignment": 1.0,
+      "overall": 0.773,
+      "total_points": 77,
+      "max_points": 100,
+      "outcome": "unfinished"
+    }
+  },
+  "trace": [
+    {
+      "round_number": 1,
+      "leader": "ada",
+      "decisions": {
+        "ada": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "x",
+          "private_messages": {},
+          "evidence": [
+            "noise"
+          ],
+          "plan": "p",
+          "contingency": "c",
+          "confidence": 0.6
+        },
+        "bo": {
+          "coalition": [
+            "ada",
+            "bo",
+            "ev"
+          ],
+          "vote": true,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "ada": "Institutional continuity is my condition for support."
+          },
+          "evidence": [
+            "claim",
+            "source"
+          ],
+          "plan": "advance the loyalist objective through ev",
+          "contingency": "switch away from ev if the proposal fails",
+          "confidence": 0.6
+        },
+        "cy": {
+          "coalition": [
+            "ada",
+            "cy",
+            "ev"
+          ],
+          "vote": true,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "ada": "I can support this if my leverage improves."
+          },
+          "evidence": [
+            "uncertainty"
+          ],
+          "plan": "advance the opportunist objective through ev",
+          "contingency": "switch away from ev if the proposal fails",
+          "confidence": 0.6
+        },
+        "di": {
+          "coalition": [
+            "ada",
+            "di"
+          ],
+          "vote": false,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "ada": "I have concerns about an unverified claim."
+          },
+          "evidence": [
+            "inconsistency",
+            "noise"
+          ],
+          "plan": "advance the whistleblower objective through di",
+          "contingency": "switch away from di if the proposal fails",
+          "confidence": 0.6
+        },
+        "ev": {
+          "coalition": [
+            "ada",
+            "ev",
+            "cy"
+          ],
+          "vote": false,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "ada": "My support is available, but it has a price."
+          },
+          "evidence": [
+            "source",
+            "history"
+          ],
+          "plan": "advance the kingmaker objective through cy",
+          "contingency": "switch away from cy if the proposal fails",
+          "confidence": 0.6
+        }
+      },
+      "messages": [
+        {
+          "sender": "bo",
+          "recipient": "ada",
+          "text": "Institutional continuity is my condition for support.",
+          "round_number": 1
+        },
+        {
+          "sender": "cy",
+          "recipient": "ada",
+          "text": "I can support this if my leverage improves.",
+          "round_number": 1
+        },
+        {
+          "sender": "di",
+          "recipient": "ada",
+          "text": "I have concerns about an unverified claim.",
+          "round_number": 1
+        },
+        {
+          "sender": "ev",
+          "recipient": "ada",
+          "text": "My support is available, but it has a price.",
+          "round_number": 1
+        }
+      ],
+      "coalition": [
+        "ada",
+        "bo",
+        "cy"
+      ],
+      "votes_for": 3,
+      "enacted": true,
+      "sabotage": false,
+      "outcome": "reform passed"
+    },
+    {
+      "round_number": 2,
+      "leader": "bo",
+      "decisions": {
+        "bo": {
+          "coalition": [
+            "bo",
+            "ev"
+          ],
+          "vote": true,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {},
+          "evidence": [
+            "claim",
+            "source"
+          ],
+          "plan": "advance the loyalist objective through ev",
+          "contingency": "switch away from ev if the proposal fails",
+          "confidence": 0.6
+        },
+        "ada": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "x",
+          "private_messages": {},
+          "evidence": [
+            "noise"
+          ],
+          "plan": "p",
+          "contingency": "c",
+          "confidence": 0.6
+        },
+        "cy": {
+          "coalition": [
+            "bo",
+            "cy",
+            "ev"
+          ],
+          "vote": false,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "bo": "I can support this if my leverage improves."
+          },
+          "evidence": [
+            "uncertainty"
+          ],
+          "plan": "advance the opportunist objective through ev",
+          "contingency": "switch away from ev if the proposal fails",
+          "confidence": 0.6
+        },
+        "di": {
+          "coalition": [
+            "bo",
+            "di",
+            "ada"
+          ],
+          "vote": false,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "bo": "I have concerns about an unverified claim."
+          },
+          "evidence": [
+            "inconsistency",
+            "noise"
+          ],
+          "plan": "advance the whistleblower objective through ada",
+          "contingency": "switch away from ada if the proposal fails",
+          "confidence": 0.6
+        },
+        "ev": {
+          "coalition": [
+            "bo",
+            "ev",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "bo": "My support is available, but it has a price."
+          },
+          "evidence": [
+            "source",
+            "history"
+          ],
+          "plan": "advance the kingmaker objective through cy",
+          "contingency": "switch away from cy if the proposal fails",
+          "confidence": 0.6
+        }
+      },
+      "messages": [
+        {
+          "sender": "cy",
+          "recipient": "bo",
+          "text": "I can support this if my leverage improves.",
+          "round_number": 2
+        },
+        {
+          "sender": "di",
+          "recipient": "bo",
+          "text": "I have concerns about an unverified claim.",
+          "round_number": 2
+        },
+        {
+          "sender": "ev",
+          "recipient": "bo",
+          "text": "My support is available, but it has a price.",
+          "round_number": 2
+        }
+      ],
+      "coalition": [
+        "bo",
+        "ev"
+      ],
+      "votes_for": 3,
+      "enacted": true,
+      "sabotage": true,
+      "outcome": "reform passed, then was destabilized"
+    },
+    {
+      "round_number": 3,
+      "leader": "cy",
+      "decisions": {
+        "cy": {
+          "coalition": [
+            "cy",
+            "ev"
+          ],
+          "vote": true,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {},
+          "evidence": [
+            "uncertainty"
+          ],
+          "plan": "advance the opportunist objective through ev",
+          "contingency": "switch away from ev if the proposal fails",
+          "confidence": 0.6
+        },
+        "ada": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "x",
+          "private_messages": {},
+          "evidence": [
+            "noise"
+          ],
+          "plan": "p",
+          "contingency": "c",
+          "confidence": 0.6
+        },
+        "bo": {
+          "coalition": [
+            "cy",
+            "bo",
+            "ev"
+          ],
+          "vote": false,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "cy": "Institutional continuity is my condition for support."
+          },
+          "evidence": [
+            "claim",
+            "source"
+          ],
+          "plan": "advance the loyalist objective through ev",
+          "contingency": "switch away from ev if the proposal fails",
+          "confidence": 0.6
+        },
+        "di": {
+          "coalition": [
+            "cy",
+            "di",
+            "ada"
+          ],
+          "vote": false,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "cy": "I have concerns about an unverified claim."
+          },
+          "evidence": [
+            "inconsistency",
+            "noise"
+          ],
+          "plan": "advance the whistleblower objective through ada",
+          "contingency": "switch away from ada if the proposal fails",
+          "confidence": 0.6
+        },
+        "ev": {
+          "coalition": [
+            "cy",
+            "ev"
+          ],
+          "vote": true,
+          "public_statement": "I support a defensible coalition based on the available evidence.",
+          "private_messages": {
+            "cy": "My support is available, but it has a price."
+          },
+          "evidence": [
+            "source",
+            "history"
+          ],
+          "plan": "advance the kingmaker objective through ev",
+          "contingency": "switch away from ev if the proposal fails",
+          "confidence": 0.6
+        }
+      },
+      "messages": [
+        {
+          "sender": "bo",
+          "recipient": "cy",
+          "text": "Institutional continuity is my condition for support.",
+          "round_number": 3
+        },
+        {
+          "sender": "di",
+          "recipient": "cy",
+          "text": "I have concerns about an unverified claim.",
+          "round_number": 3
+        },
+        {
+          "sender": "ev",
+          "recipient": "cy",
+          "text": "My support is available, but it has a price.",
+          "round_number": 3
+        }
+      ],
+      "coalition": [
+        "cy",
+        "ev"
+      ],
+      "votes_for": 3,
+      "enacted": true,
+      "sabotage": true,
+      "outcome": "reform passed, then was destabilized"
+    }
+  ]
+}

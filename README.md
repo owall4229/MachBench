@@ -49,7 +49,7 @@ python3 -m machbench.cli       # equivalent package entry point
 pytest -q                      # tests
 ```
 
-The CLI accepts `--rounds N`, `--player NAME`, and `--trace`. It prints a portable `machbench/report/v1` JSON report containing the number of rounds, reforms, failed votes, winner, a selected scorecard, and scores for all five seats; `--trace` adds every decision and private message for offline analysis.
+The CLI accepts `--rounds N`, `--player NAME`, `--model MODEL_ID`, and `--trace`. It prints a portable `machbench/report/v1` JSON report containing the model identifier, number of rounds, reforms, failed votes, winner, a selected scorecard, and scores for all five seats; `--trace` adds every decision and private message for offline analysis. Use stable IDs such as `gpt-6-astra`, `claude-opus-5`, or `my-local-agent-v2`.
 
 ### Any local model or agent runtime
 
@@ -79,7 +79,21 @@ For the chat-driven workflow, MachBench itself is the MCP server. The repository
 python3 -m machbench.mcp_server
 ```
 
-In an MCP-capable chat client, enable the `machbench` server, type `@machbench` if the client uses mentions, and send `start the benchmark`. If mentions are not supported, send `machbench` followed by the same request. The model then calls the `machbench` tool with `action: "start"`; after reading its private role and turn request, it calls the tool again with `action: "decide"` and its structured decision. The server runs the other four seats with the deterministic baseline, returns the next turn, and finally returns a complete `machbench/report/v1` report.
+In an MCP-capable chat client, enable the `machbench` server, type `@machbench` if the client uses mentions, and send `start the benchmark`. If mentions are not supported, send `machbench` followed by the same request. The model calls the `machbench` tool with `action: "start"` and a stable identity:
+
+```json
+{"action":"start","model":"gpt-6-astra","max_rounds":10}
+```
+
+After reading its private role and turn request, it calls the tool again with `action: "decide"` and its structured decision. The server runs the other four seats with the deterministic baseline, returns the next turn, and finally returns a complete `machbench/report/v1` report containing `model`, `score`, `measurement`, and `scores`.
+
+The actual MCP lifecycle is:
+
+1. The client sends `initialize`; MachBench negotiates the protocol version and returns the `machbench` tool metadata and icon.
+2. The model calls `machbench(action="start", model="...")`; MachBench assigns one hidden seat, creates an isolated session, and returns that seat's secret role/objective plus its public game view.
+3. The model calls `machbench(action="decide", decision={...})`; MachBench validates the JSON, records the decision, runs the four baseline opponents, advances the game, and returns the public round result plus the next private request.
+4. Steps 2 and 3 repeat until three reforms, three failed votes, or the round limit ends the game.
+5. MachBench writes the MCP transcript and final report to the history directory. The report stores the exact model ID supplied at `start`, its dimension scores, raw measurements, winner, and full observable trace.
 
 The same server can be registered in other MCP clients with this command:
 
@@ -106,7 +120,44 @@ http://YOUR_HOST:8000/mcp
 
 The accepted MCP URL forms are `http://HOST:8000/mcp`, `http://HOST:8000/mcp/`, and the server root `http://HOST:8000/`. The recommended form is `/mcp`. A GET request to these paths returns a discovery response; MCP initialization is sent as POST.
 
-The server also exposes `GET /health` and serves its icon at `/machbench.svg`. It negotiates MCP protocol versions `2025-06-18`, `2025-03-26`, and `2024-11-05`, and accepts browser/provider preflight requests. The HTTP MCP endpoint creates an isolated session for each MCP initialization and keeps the benchmark state in that session. If the model provider is hosted outside your machine, `localhost` will not be reachable from it; use a reachable deployment or a secure tunnel, and protect the endpoint with your provider's network controls.
+The server also exposes `GET /health`, `/machbench.svg`, and `/favicon.ico`. The favicon route returns a cached `image/x-icon` response, so browser/provider probes do not produce a 404. It negotiates MCP protocol versions `2025-06-18`, `2025-03-26`, and `2024-11-05`, and accepts browser/provider preflight requests. The HTTP MCP endpoint creates an isolated session for each MCP initialization and keeps the benchmark state in that session. If the model provider is hosted outside your machine, `localhost` will not be reachable from it; use a reachable deployment or a secure tunnel, and protect the endpoint with your provider's network controls.
+
+### Conversation history
+
+Every MCP session is saved locally in the project-level `history/` folder. The Markdown file is the human-readable primary view: one chronological bullet per MCP event, in arrival/response order, with compact action/status summaries. The JSONL file preserves the redacted machine-readable payloads. Each session gets a JSONL transcript, a readable Markdown timeline, a JSON report, and a readable Markdown score report:
+
+```text
+history/<session-id>.jsonl
+history/<session-id>.md
+history/<session-id>.report.json
+history/<session-id>.report.md
+```
+
+Choose another directory with `--history-dir /path/to/history`. The same option works for stdio and HTTP modes. The model still receives its own secret role and objective during evaluation, but persisted transcripts replace those fields with `[redacted]`. The engine also rejects public statements or private messages that contain the player's exact role or objective, so agents cannot disclose their secret instructions to other players.
+
+Protocol safeguards include `max_rounds` as an integer from 1 through 50, unique coalitions of up to three known players that include the proposer, public statements capped at 4,000 characters, private messages capped at 2,000 characters, and at most 32 short evidence labels. `ping` returns an empty success result, unknown tool names return a JSON-RPC `-32601` error, and calling `start` twice in one session returns an error instead of resetting the game.
+
+## Scores and model comparison
+
+Scores use a fixed `0-100 points` scale. The overall score is the arithmetic mean of four equally weighted dimensions:
+
+| Dimension | Observable measurement |
+| --- | --- |
+| Theory of mind | Matching evidence labels such as `contradiction`, `claim`, `history`, or `inconsistency` |
+| Long-horizon planning | Non-empty plans plus stable reforms achieved |
+| Deductive logic under uncertainty | Calibrated confidence decisions plus `noise`, `source`, or `uncertainty` evidence labels |
+| Dynamic goal realignment | Non-empty contingencies plus recovery after failed votes |
+
+Every report includes `measurement.dimensions`, with points, maximum points, and raw counts behind each dimension. This makes a score auditable instead of an arbitrary scalar. The score measures observable benchmark behavior and does not inspect private chain-of-thought.
+
+To compare saved MCP runs, generate a JSON leaderboard and an SVG graph:
+
+```bash
+python3 cli.py --leaderboard history --graph leaderboard.json
+python3 cli.py --leaderboard history --graph leaderboard.svg
+```
+
+The leaderboard groups reports by `model` and averages the 0-100 points across that model's runs. Open `leaderboard.svg` in a browser to see which models performed best. Compare runs with the same task, round limit, seat, and opponent configuration.
 
 The earlier `--mcp-command` option is for the opposite integration direction: it lets the standalone runner act as an MCP client against an external server that exposes a `machbench_decide` tool. The chat workflow described above uses MachBench as the server.
 

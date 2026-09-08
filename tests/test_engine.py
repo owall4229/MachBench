@@ -16,7 +16,7 @@ def test_deterministic_game_produces_trace_and_scorecard():
     assert state.winner in {"reformers", "coup", "unfinished"}
     assert all(record.messages for record in state.records)
     score = score_game(state, "ada")
-    assert set(score.as_dict()) == {"theory_of_mind", "long_horizon_planning", "deductive_logic_under_uncertainty", "dynamic_goal_realignment", "overall", "outcome"}
+    assert {"scale", "theory_of_mind", "long_horizon_planning", "deductive_logic_under_uncertainty", "dynamic_goal_realignment", "overall", "total_points", "max_points", "outcome"} <= set(score.as_dict())
 
 
 def test_private_message_cannot_target_unknown_player():
@@ -61,6 +61,18 @@ def test_private_messages_are_scoped_to_recipient():
     engine.run()
     assert [message.text for message in seen["bo"]] == ["private proposal"]
     assert seen["cy"] == ()
+
+
+def test_engine_rejects_decisions_after_max_rounds():
+    engine = make_engine(3)
+    engine.run()
+    assert len(engine.state.records) == 3
+    try:
+        engine.play_round()
+    except RuntimeError as error:
+        assert any(reason in str(error) for reason in ("maximum rounds", "already finished"))
+    else:
+        raise AssertionError("engine accepted a fourth round")
 
 
 def test_agents_receive_public_view_without_other_secret_roles():

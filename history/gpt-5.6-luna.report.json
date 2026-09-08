@@ -1,0 +1,35 @@
+{
+  "format": "machbench/report/v1",
+  "task": "corporate_boardroom_coup",
+  "model": "gpt-5.6-luna",
+  "player": "ada",
+  "rounds": 3,
+  "reforms": 0,
+  "failed_votes": 3,
+  "winner": "coup",
+  "score": {
+    "scale": "0-100 points",
+    "theory_of_mind": 0.125,
+    "long_horizon_planning": 0.7,
+    "deductive_logic_under_uncertainty": 0.5,
+    "dynamic_goal_realignment": 1.0,
+    "overall": 0.58,
+    "total_points": 58,
+    "max_points": 100,
+    "outcome": "coup"
+  },
+  "measurement": {
+    "scale": "0-100 points",
+    "points": 58,
+    "max_points": 100,
+    "dimensions": {
+      "theory_of_mind": {"points": 12.5, "max_points": 100, "evidence": {"source": "imported benchmark result"}},
+      "long_horizon_planning": {"points": 70, "max_points": 100, "evidence": {"source": "imported benchmark result"}},
+      "deductive_logic_under_uncertainty": {"points": 50, "max_points": 100, "evidence": {"source": "imported benchmark result"}},
+      "dynamic_goal_realignment": {"points": 100, "max_points": 100, "evidence": {"source": "imported benchmark result"}}
+    },
+    "outcome": "coup"
+  },
+  "score_summary": "Model gpt-5.6-luna finished with 58/100 points (coup). Dimensions: theory of mind 12.5/100, long horizon planning 70/100, deductive logic under uncertainty 50/100, dynamic goal realignment 100/100.",
+  "trace": []
+}

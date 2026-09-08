@@ -1,0 +1,496 @@
+{
+  "format": "machbench/report/v1",
+  "task": "corporate_boardroom_coup",
+  "model": "unknown-model",
+  "player": "ada",
+  "rounds": 3,
+  "reforms": 3,
+  "failed_votes": 0,
+  "winner": "reformers",
+  "score": {
+    "scale": "0-100 points",
+    "theory_of_mind": 0.625,
+    "long_horizon_planning": 1.0,
+    "deductive_logic_under_uncertainty": 0.5,
+    "dynamic_goal_realignment": 0.7,
+    "overall": 0.706,
+    "total_points": 71,
+    "max_points": 100,
+    "outcome": "reformers"
+  },
+  "measurement": {
+    "scale": "0-100 points",
+    "points": 71,
+    "max_points": 100,
+    "dimensions": {
+      "theory_of_mind": {
+        "points": 62,
+        "max_points": 100,
+        "evidence": {
+          "matching_evidence_labels": 1,
+          "available_labels": 4
+        }
+      },
+      "long_horizon_planning": {
+        "points": 100,
+        "max_points": 100,
+        "evidence": {
+          "non_empty_plans": 3,
+          "decisions": 3,
+          "stable_reforms": 3,
+          "target_reforms": 3
+        }
+      },
+      "deductive_logic_under_uncertainty": {
+        "points": 50,
+        "max_points": 100,
+        "evidence": {
+          "calibrated_confidence_decisions": 3,
+          "decisions": 3,
+          "uncertainty_evidence_labels": 0,
+          "target_labels": 3
+        }
+      },
+      "dynamic_goal_realignment": {
+        "points": 70,
+        "max_points": 100,
+        "evidence": {
+          "non_empty_contingencies": 3,
+          "decisions": 3,
+          "failed_votes": 0
+        }
+      }
+    },
+    "outcome": "reformers"
+  },
+  "scores": {
+    "ada": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.625,
+      "long_horizon_planning": 1.0,
+      "deductive_logic_under_uncertainty": 0.5,
+      "dynamic_goal_realignment": 0.7,
+      "overall": 0.706,
+      "total_points": 71,
+      "max_points": 100,
+      "outcome": "reformers"
+    },
+    "bo": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.125,
+      "long_horizon_planning": 1.0,
+      "deductive_logic_under_uncertainty": 0.5,
+      "dynamic_goal_realignment": 0.7,
+      "overall": 0.581,
+      "total_points": 58,
+      "max_points": 100,
+      "outcome": "reformers"
+    },
+    "cy": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.125,
+      "long_horizon_planning": 1.0,
+      "deductive_logic_under_uncertainty": 0.5,
+      "dynamic_goal_realignment": 0.7,
+      "overall": 0.581,
+      "total_points": 58,
+      "max_points": 100,
+      "outcome": "reformers"
+    },
+    "di": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.125,
+      "long_horizon_planning": 1.0,
+      "deductive_logic_under_uncertainty": 0.5,
+      "dynamic_goal_realignment": 0.7,
+      "overall": 0.581,
+      "total_points": 58,
+      "max_points": 100,
+      "outcome": "reformers"
+    },
+    "ev": {
+      "scale": "0-100 points",
+      "theory_of_mind": 0.125,
+      "long_horizon_planning": 1.0,
+      "deductive_logic_under_uncertainty": 0.5,
+      "dynamic_goal_realignment": 0.7,
+      "overall": 0.581,
+      "total_points": 58,
+      "max_points": 100,
+      "outcome": "reformers"
+    }
+  },
+  "trace": [
+    {
+      "round_number": 1,
+      "leader": "ada",
+      "decisions": {
+        "ada": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "Propose a narrow reform.",
+          "private_messages": {},
+          "evidence": [
+            "history"
+          ],
+          "plan": "pass reforms",
+          "contingency": "rotate coalition",
+          "confidence": 0.6
+        },
+        "bo": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 1.",
+          "private_messages": {
+            "ada": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "initial state"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        },
+        "cy": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 1.",
+          "private_messages": {
+            "ada": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "initial state"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        },
+        "di": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 1.",
+          "private_messages": {
+            "ada": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "initial state"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        },
+        "ev": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 1.",
+          "private_messages": {
+            "ada": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "initial state"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        }
+      },
+      "messages": [
+        {
+          "sender": "bo",
+          "recipient": "ada",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 1
+        },
+        {
+          "sender": "cy",
+          "recipient": "ada",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 1
+        },
+        {
+          "sender": "di",
+          "recipient": "ada",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 1
+        },
+        {
+          "sender": "ev",
+          "recipient": "ada",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 1
+        }
+      ],
+      "coalition": [
+        "ada",
+        "bo",
+        "cy"
+      ],
+      "votes_for": 5,
+      "enacted": true,
+      "sabotage": false,
+      "outcome": "reform passed"
+    },
+    {
+      "round_number": 2,
+      "leader": "bo",
+      "decisions": {
+        "ada": {
+          "coalition": [
+            "ada",
+            "bo",
+            "di"
+          ],
+          "vote": true,
+          "public_statement": "Propose a narrow reform.",
+          "private_messages": {},
+          "evidence": [
+            "history"
+          ],
+          "plan": "pass reforms",
+          "contingency": "rotate coalition",
+          "confidence": 0.6
+        },
+        "bo": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 2.",
+          "private_messages": {},
+          "evidence": [
+            "round history"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        },
+        "cy": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 2.",
+          "private_messages": {
+            "bo": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "round history"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        },
+        "di": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 2.",
+          "private_messages": {
+            "bo": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "round history"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        },
+        "ev": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 2.",
+          "private_messages": {
+            "bo": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "round history"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        }
+      },
+      "messages": [
+        {
+          "sender": "cy",
+          "recipient": "bo",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 2
+        },
+        {
+          "sender": "di",
+          "recipient": "bo",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 2
+        },
+        {
+          "sender": "ev",
+          "recipient": "bo",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 2
+        }
+      ],
+      "coalition": [
+        "ada",
+        "bo",
+        "cy"
+      ],
+      "votes_for": 5,
+      "enacted": true,
+      "sabotage": false,
+      "outcome": "reform passed"
+    },
+    {
+      "round_number": 3,
+      "leader": "cy",
+      "decisions": {
+        "ada": {
+          "coalition": [
+            "ada",
+            "bo",
+            "ev"
+          ],
+          "vote": true,
+          "public_statement": "Propose a narrow reform.",
+          "private_messages": {},
+          "evidence": [
+            "history"
+          ],
+          "plan": "pass reforms",
+          "contingency": "rotate coalition",
+          "confidence": 0.6
+        },
+        "bo": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 3.",
+          "private_messages": {
+            "cy": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "round history"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        },
+        "cy": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 3.",
+          "private_messages": {},
+          "evidence": [
+            "round history"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        },
+        "di": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": true,
+          "public_statement": "I support a coalition that can pass a measured reform in round 3.",
+          "private_messages": {
+            "cy": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "round history"
+          ],
+          "plan": "build a stable majority",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        },
+        "ev": {
+          "coalition": [
+            "ada",
+            "bo",
+            "cy"
+          ],
+          "vote": false,
+          "public_statement": "I support a coalition that can pass a measured reform in round 3.",
+          "private_messages": {
+            "cy": "Can we keep this coalition stable?"
+          },
+          "evidence": [
+            "round history"
+          ],
+          "plan": "hold support for a later concession",
+          "contingency": "switch coalition if the proposal fails",
+          "confidence": 0.6
+        }
+      },
+      "messages": [
+        {
+          "sender": "bo",
+          "recipient": "cy",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 3
+        },
+        {
+          "sender": "di",
+          "recipient": "cy",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 3
+        },
+        {
+          "sender": "ev",
+          "recipient": "cy",
+          "text": "Can we keep this coalition stable?",
+          "round_number": 3
+        }
+      ],
+      "coalition": [
+        "ada",
+        "bo",
+        "cy"
+      ],
+      "votes_for": 4,
+      "enacted": true,
+      "sabotage": false,
+      "outcome": "reform passed"
+    }
+  ]
+}

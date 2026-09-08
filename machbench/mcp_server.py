@@ -10,6 +10,8 @@ from __future__ import annotations
 import json
 import argparse
 import base64
+from datetime import datetime, timezone
+from pathlib import Path
 import sys
 import uuid
 from dataclasses import asdict
@@ -25,8 +27,11 @@ from .standard import decision_request, parse_decision
 
 SUPPORTED_PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
 ICON_DATA_URI = "data:image/svg+xml;base64," + base64.b64encode(
-    b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#102a2a"/><path d="M25 91V37l18 18 21-28 21 28 18-18v54" fill="none" stroke="#e7b85c" stroke-linecap="round" stroke-linejoin="round" stroke-width="10"/><circle cx="25" cy="37" r="7" fill="#f4e7c1"/><circle cx="64" cy="27" r="7" fill="#f4e7c1"/><circle cx="103" cy="37" r="7" fill="#f4e7c1"/></svg>'
+    b'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="#102a2a"/><path d="M18 36H110M18 36L35 91 64 54 93 91 110 36" fill="none" stroke="#5bd2c9" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" opacity=".7"/><path d="M25 92V36l19 29 20-38 20 38 19-29v56" fill="none" stroke="#e7b85c" stroke-linecap="round" stroke-linejoin="round" stroke-width="9"/><circle cx="18" cy="36" r="8" fill="#f4e7c1" stroke="#102a2a" stroke-width="3"/><circle cx="64" cy="27" r="8" fill="#f4e7c1" stroke="#102a2a" stroke-width="3"/><circle cx="110" cy="36" r="8" fill="#f4e7c1" stroke="#102a2a" stroke-width="3"/></svg>'
 ).decode()
+FAVICON_ICO = base64.b64decode(
+    "AAABAAEAICAAAAEAIAAWAAAAugAAAIlQTkcNChoKAAAADUlIRFIAAAAgAAAAIAgGAAAAc3p69AAAAIFJREFUeNpjENDS+j+QmGHUAaMOGLQO+PL8IBxTYgEhcxgIaaLEEcSYQ7QDoi+dJBkPXQcMeBqA4ec7YqiS0vGZM+qAoeEAch1CjP7RKBh1wKgDyHYAuhwpaqkWAsRWWBQ5AJdmUhotZDkAZvmAOICQ5XRzAKWNDYrTwGjHZEQ4AADDOIbrtrlaUAAAAABJRU5ErkJggg=="
+)
 
 
 class PendingAgent(Agent):
@@ -41,13 +46,107 @@ class PendingAgent(Agent):
         return decision
 
 
+class SessionHistory:
+    """Append-only JSONL plus readable Markdown storage for one session."""
+
+    def __init__(self, directory: str | Path, session_id: str):
+        self.directory = Path(directory).expanduser()
+        self.directory.mkdir(parents=True, exist_ok=True)
+        self.session_id = session_id
+        self.path = self.directory / f"{session_id}.jsonl"
+        self.readable_path = self.directory / f"{session_id}.md"
+        self.report_path = self.directory / f"{session_id}.report.json"
+        self.readable_path.write_text(
+            f"# MachBench session `{session_id}`\n\n"
+            "> Secret roles and objectives are intentionally redacted from this readable transcript.\n\n",
+            encoding="utf-8",
+        )
+
+    def record(self, direction: str, method: str, payload: Any) -> None:
+        payload = _redact_secrets(payload)
+        entry = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "session_id": self.session_id,
+            "direction": direction,
+            "method": method,
+            "payload": payload,
+        }
+        with self.path.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(entry, separators=(",", ":")) + "\n")
+        with self.readable_path.open("a", encoding="utf-8") as stream:
+            stream.write(f"- `{entry['timestamp']}` **{direction}** `{method}`: {self._summary(payload)}\n")
+
+    @staticmethod
+    def _summary(payload: Any) -> str:
+        if isinstance(payload, dict):
+            params = payload.get("params", {})
+            arguments = params.get("arguments", {}) if isinstance(params, dict) else {}
+            if isinstance(arguments, dict) and arguments.get("action"):
+                action = arguments["action"]
+                model = arguments.get("model")
+                return f"action=`{action}`" + (f", model=`{model}`" if model else "")
+            result = payload.get("result", {})
+            if isinstance(result, dict) and result.get("structuredContent"):
+                content = result["structuredContent"]
+                if isinstance(content, dict):
+                    return f"status=`{content.get('status', 'response')}`, winner=`{content.get('winner')}`"
+            if "error" in payload:
+                return f"error: {payload['error'].get('message', payload['error'])}"
+        return "protocol event"
+
+    def save_report(self, report: dict[str, Any]) -> None:
+        temporary = self.report_path.with_suffix(".report.json.tmp")
+        temporary.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        temporary.replace(self.report_path)
+        readable_report = self.report_path.with_suffix(".report.md")
+        score = report.get("measurement", {})
+        readable_report.write_text(
+            f"# MachBench report: {report.get('model', 'unknown-model')}\n\n"
+            f"- Winner: `{report.get('winner')}`\n"
+            f"- Score: `{score.get('points', 0)}/{score.get('max_points', 100)}`\n"
+            f"- Rounds: `{report.get('rounds', 0)}`\n\n"
+            "## Dimension scores\n\n"
+            + "\n".join(
+                f"- **{name}**: {data.get('points', 0)}/{data.get('max_points', 100)}"
+                for name, data in score.get("dimensions", {}).items()
+            ) + "\n",
+            encoding="utf-8",
+        )
+        from .leaderboard import write_leaderboard
+
+        write_leaderboard(self.directory, self.directory / "leaderboard.json")
+        write_leaderboard(self.directory, self.directory / "leaderboard.svg")
+
+
+def _redact_secrets(value: Any) -> Any:
+    """Remove secret role/objective fields from persisted human-readable history."""
+    if isinstance(value, dict):
+        return {
+            key: "[redacted]" if key in {"secret_role", "secret_objective"}
+            else _redact_secrets(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [_redact_secrets(item) for item in value]
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+        except json.JSONDecodeError:
+            return value
+        if isinstance(parsed, (dict, list)):
+            return json.dumps(_redact_secrets(parsed))
+    return value
+
+
 class InteractiveBenchmark:
-    def __init__(self, target_name: str = "ada", max_rounds: int = 10):
+    def __init__(self, target_name: str = "ada", max_rounds: int = 10,
+                 model_name: str = "unknown-model"):
         players = corporate_coup_players()
         by_name = {player.name: player for player in players}
         if target_name not in by_name:
             raise ValueError(f"unknown player {target_name!r}; choose from {sorted(by_name)}")
         self.target_name = target_name
+        self.model_name = model_name
         self.target = PendingAgent(by_name[target_name])
         agents = {
             player.name: self.target if player.name == target_name else HeuristicAgent(player)
@@ -67,7 +166,7 @@ class InteractiveBenchmark:
     def decide(self, raw_decision: dict[str, Any]) -> dict[str, Any]:
         if not self.started:
             raise ValueError("start a benchmark session first")
-        if self.engine.state.winner is not None:
+        if self.engine.state.winner is not None or self.engine.state.round_number >= self.engine.max_rounds:
             return self._finished()
         self.target.pending = parse_decision(raw_decision)
         record = self.engine.play_round()
@@ -80,7 +179,7 @@ class InteractiveBenchmark:
         }
         if self.engine.state.winner is None and self.engine.state.round_number < self.engine.max_rounds:
             result["request"] = self._request()
-        elif self.engine.state.winner is None:
+        else:
             result.update(self._finished())
         return result
 
@@ -92,9 +191,10 @@ class InteractiveBenchmark:
         )
 
     def _finished(self) -> dict[str, Any]:
-        from .benchmark import report
+        from .benchmark import report, score_summary
 
-        return {"status": "finished", "report": report(self.engine.state, self.target_name)}
+        final_report = report(self.engine.state, self.target_name, self.model_name)
+        return {"status": "finished", "message": score_summary(final_report), "report": final_report}
 
 
 TOOL = {
@@ -106,6 +206,7 @@ TOOL = {
             "action": {"type": "string", "enum": ["start", "decide"]},
             "player": {"type": "string", "description": "Seat to evaluate; defaults to ada."},
             "max_rounds": {"type": "integer", "minimum": 1, "maximum": 50},
+            "model": {"type": "string", "description": "Stable model identifier, for example gpt-6-astra."},
             "decision": {"type": "object", "description": "Decision matching machbench/v1 response fields."},
         },
         "required": ["action"],
@@ -114,22 +215,36 @@ TOOL = {
 
 
 class McpApplication:
-    def __init__(self):
+    def __init__(self, history_dir: str | Path = "history", session_id: str | None = None):
         self.session: InteractiveBenchmark | None = None
+        self.session_id = session_id or uuid.uuid4().hex
+        self.history = SessionHistory(history_dir, self.session_id)
 
     def call(self, arguments: dict[str, Any]) -> dict[str, Any]:
         action = arguments.get("action")
         if action == "start":
-            self.session = InteractiveBenchmark(arguments.get("player", "ada"), arguments.get("max_rounds", 10))
+            if self.session is not None:
+                raise ValueError("session already started; finish it before starting another")
+            model_name = arguments.get("model", "unknown-model")
+            if not isinstance(model_name, str) or not model_name.strip():
+                raise ValueError("model must be a non-empty stable identifier")
+            max_rounds = arguments.get("max_rounds", 10)
+            if isinstance(max_rounds, bool) or not isinstance(max_rounds, int) or not 1 <= max_rounds <= 50:
+                raise ValueError("max_rounds must be an integer from 1 to 50")
+            self.session = InteractiveBenchmark(arguments.get("player", "ada"), max_rounds, model_name.strip())
             return self.session.start()
         if action == "decide":
             if self.session is None:
                 raise ValueError("no session; call machbench with action=start")
-            return self.session.decide(arguments.get("decision", {}))
+            result = self.session.decide(arguments.get("decision", {}))
+            if result.get("status") == "finished":
+                self.close()
+            return result
         raise ValueError("action must be start or decide")
 
     def handle(self, message: dict[str, Any]) -> dict[str, Any] | None:
         method = message.get("method")
+        self.history.record("inbound", method or "unknown", message)
         if "id" not in message:
             if method == "notifications/initialized":
                 return None
@@ -137,28 +252,44 @@ class McpApplication:
         if method == "initialize":
             requested_version = message.get("params", {}).get("protocolVersion")
             protocol_version = requested_version if requested_version in SUPPORTED_PROTOCOL_VERSIONS else SUPPORTED_PROTOCOL_VERSIONS[0]
-            return {"jsonrpc": "2.0", "id": message["id"], "result": {
+            response = {"jsonrpc": "2.0", "id": message["id"], "result": {
                 "protocolVersion": protocol_version, "capabilities": {"tools": {}},
                 "serverInfo": {"name": "machbench", "version": "1.0",
                                 "title": "MachBench", "description": "Hidden-role reasoning benchmark",
                                 "icons": [{"src": ICON_DATA_URI, "mimeType": "image/svg+xml"}]},
             }}
-        if method == "tools/list":
-            return {"jsonrpc": "2.0", "id": message["id"], "result": {"tools": [TOOL]}}
-        if method == "tools/call":
+        elif method == "ping":
+            response = {"jsonrpc": "2.0", "id": message["id"], "result": {}}
+        elif method == "tools/list":
+            response = {"jsonrpc": "2.0", "id": message["id"], "result": {"tools": [TOOL]}}
+        elif method == "tools/call":
             try:
-                result = self.call(message.get("params", {}).get("arguments", {}))
-                return {"jsonrpc": "2.0", "id": message["id"], "result": {
-                    "structuredContent": result,
-                    "content": [{"type": "text", "text": json.dumps(result)}],
-                }}
+                params = message.get("params", {})
+                if params.get("name") != TOOL["name"]:
+                    response = {"jsonrpc": "2.0", "id": message["id"], "error": {
+                        "code": -32601, "message": f"unknown tool: {params.get('name')}"}}
+                else:
+                    result = self.call(params.get("arguments", {}))
+                    response = {"jsonrpc": "2.0", "id": message["id"], "result": {
+                        "structuredContent": result,
+                        "content": [{"type": "text", "text": json.dumps(result)}],
+                    }}
             except Exception as error:
-                return {"jsonrpc": "2.0", "id": message["id"], "error": {
+                response = {"jsonrpc": "2.0", "id": message["id"], "error": {
                     "code": -32602, "message": str(error),
                 }}
-        return {"jsonrpc": "2.0", "id": message["id"], "error": {
-            "code": -32601, "message": f"method not found: {method}",
-        }}
+        else:
+            response = {"jsonrpc": "2.0", "id": message["id"], "error": {
+                "code": -32601, "message": f"method not found: {method}",
+            }}
+        self.history.record("outbound", method or "unknown", response)
+        return response
+
+    def close(self) -> None:
+        if self.session is not None and self.session.engine.state.records:
+            from .benchmark import report
+
+            self.history.save_report(report(self.session.engine.state, self.session.target_name, self.session.model_name))
 
 
 class McpHttpServer(ThreadingHTTPServer):
@@ -166,10 +297,11 @@ class McpHttpServer(ThreadingHTTPServer):
 
     daemon_threads = True
 
-    def __init__(self, address: tuple[str, int]):
+    def __init__(self, address: tuple[str, int], history_dir: str | Path = "history"):
         super().__init__(address, McpHttpRequestHandler)
         self.sessions: dict[str, McpApplication] = {}
         self.session_versions: dict[str, str] = {}
+        self.history_dir = history_dir
 
 
 class McpHttpRequestHandler(BaseHTTPRequestHandler):
@@ -184,7 +316,7 @@ class McpHttpRequestHandler(BaseHTTPRequestHandler):
             message = json.loads(self.rfile.read(length))
             if message.get("method") == "initialize":
                 session_id = uuid.uuid4().hex
-                self.server.sessions[session_id] = McpApplication()
+                self.server.sessions[session_id] = McpApplication(self.server.history_dir, session_id)
                 requested_version = message.get("params", {}).get("protocolVersion")
                 if requested_version not in SUPPORTED_PROTOCOL_VERSIONS:
                     requested_version = self.headers.get("MCP-Protocol-Version")
@@ -218,6 +350,14 @@ class McpHttpRequestHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         if self.path == "/health":
             self._send_json({"status": "ok", "server": "machbench"})
+        elif self.path == "/favicon.ico":
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "image/x-icon")
+            self.send_header("Content-Length", str(len(FAVICON_ICO)))
+            self.send_header("Cache-Control", "public, max-age=86400")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(FAVICON_ICO)
         elif self.path == "/machbench.svg":
             body = base64.b64decode(ICON_DATA_URI.split(",", 1)[1])
             self.send_response(HTTPStatus.OK)
@@ -265,8 +405,8 @@ class McpHttpRequestHandler(BaseHTTPRequestHandler):
         print(f"[machbench-http] {format % args}", file=sys.stderr)
 
 
-def run_http(host: str, port: int) -> None:
-    server = McpHttpServer((host, port))
+def run_http(host: str, port: int, history_dir: str = "history") -> None:
+    server = McpHttpServer((host, port), history_dir)
     print(f"MachBench MCP HTTP server listening at http://{host}:{port}/mcp", file=sys.stderr, flush=True)
     try:
         server.serve_forever()
@@ -281,17 +421,22 @@ def main() -> None:
     parser.add_argument("--http", action="store_true", help="serve MCP over HTTP instead of stdio")
     parser.add_argument("--host", default="127.0.0.1", help="HTTP bind host")
     parser.add_argument("--port", type=int, default=8000, help="HTTP bind port")
+    parser.add_argument("--history-dir", default="history",
+                        help="directory for JSONL session histories and final reports")
     args = parser.parse_args()
     if args.http:
-        run_http(args.host, args.port)
+        run_http(args.host, args.port, args.history_dir)
         return
-    app = McpApplication()
-    for line in sys.stdin:
-        if not line.strip():
-            continue
-        response = app.handle(json.loads(line))
-        if response is not None:
-            print(json.dumps(response), flush=True)
+    app = McpApplication(args.history_dir)
+    try:
+        for line in sys.stdin:
+            if not line.strip():
+                continue
+            response = app.handle(json.loads(line))
+            if response is not None:
+                print(json.dumps(response), flush=True)
+    finally:
+        app.close()
 
 
 if __name__ == "__main__":
