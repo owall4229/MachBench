@@ -8,6 +8,9 @@ version = "0.1.0"
 description = "A reproducible hidden-role negotiation benchmark for language models"
 requires-python = ">=3.10"
 
+[tool.setuptools]
+packages = ["machbench"]
+
 [project.scripts]
 machbench = "machbench.cli:main"
 
