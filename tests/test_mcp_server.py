@@ -41,6 +41,8 @@ def test_mcp_advertises_machbench_tool_and_runs_session(tmp_path: Path):
     assert "/100" in finished["message"]
     assert (tmp_path / "leaderboard.json").exists()
     assert (tmp_path / "leaderboard.svg").exists()
+    leaderboard_data = json.loads((tmp_path / "leaderboard.json").read_text())
+    assert leaderboard_data["models"][0]["model"] == "gpt-6-astra"
     histories = list(tmp_path.glob("*.jsonl"))
     reports = list(tmp_path.glob("*.report.json"))
     assert len(histories) == 1
@@ -63,12 +65,15 @@ def test_http_transport_creates_isolated_session():
     thread.start()
     url = f"http://127.0.0.1:{server.server_port}/mcp"
     try:
-        for probe_url in (url, url + "/", f"http://127.0.0.1:{server.server_port}/", f"http://127.0.0.1:{server.server_port}/favicon.ico"):
+        for probe_url in (url, url + "/", f"http://127.0.0.1:{server.server_port}/health", f"http://127.0.0.1:{server.server_port}/favicon.ico"):
             with urlopen(probe_url) as response:
                 if probe_url.endswith("favicon.ico"):
                     assert response.headers["Content-Type"] == "image/x-icon"
                 else:
                     assert json.loads(response.read())["status"] == "ok"
+        with urlopen(f"http://127.0.0.1:{server.server_port}/") as response:
+            assert response.headers["Content-Type"].startswith("text/html")
+            assert "MachBench MCP Server" in response.read().decode()
         request = Request(url, json.dumps({"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}}).encode(),
                           {"Content-Type": "application/json", "MCP-Protocol-Version": "2024-11-05"})
         with urlopen(request) as response:

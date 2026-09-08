@@ -5,13 +5,16 @@ from html import escape
 from pathlib import Path
 from typing import Any
 
+EXCLUDED_MODELS = frozenset({"unknown-model", "claude"})
+
 
 def load_reports(directory: str | Path) -> list[dict[str, Any]]:
     reports = []
     for path in sorted(Path(directory).expanduser().glob("*.report.json")):
         try:
             report = json.loads(path.read_text(encoding="utf-8"))
-            if report.get("format") == "machbench/report/v1":
+            if (report.get("format") == "machbench/report/v1"
+                    and report.get("model") not in EXCLUDED_MODELS):
                 reports.append(report)
         except (OSError, json.JSONDecodeError):
             continue

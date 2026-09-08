@@ -112,6 +112,8 @@ For a provider that only accepts a custom MCP URL, expose the HTTP transport ins
 python3 -m machbench.mcp_server --http --host 0.0.0.0 --port 8000
 ```
 
+Opening `http://YOUR_HOST:8000/` in Chrome shows a small server status page. The MCP client URL is still `http://YOUR_HOST:8000/mcp`; the browser page is only a health check and connection hint.
+
 Register this URL in the provider:
 
 ```text
@@ -157,7 +159,7 @@ python3 cli.py --leaderboard history --graph leaderboard.json
 python3 cli.py --leaderboard history --graph leaderboard.svg
 ```
 
-The leaderboard groups reports by `model` and averages the 0-100 points across that model's runs. Open `leaderboard.svg` in a browser to see which models performed best. Compare runs with the same task, round limit, seat, and opponent configuration.
+The leaderboard groups reports by `model` and averages the 0-100 points across that model's runs. Legacy entries named `unknown-model` and `claude` are excluded because they do not identify a usable model version. Open `leaderboard.svg` in a browser to see which models performed best. New completed MCP sessions automatically refresh the leaderboard files in the history directory. Compare runs with the same task, round limit, seat, and opponent configuration.
 
 The earlier `--mcp-command` option is for the opposite integration direction: it lets the standalone runner act as an MCP client against an external server that exposes a `machbench_decide` tool. The chat workflow described above uses MachBench as the server.
 

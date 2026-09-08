@@ -32,6 +32,13 @@ ICON_DATA_URI = "data:image/svg+xml;base64," + base64.b64encode(
 FAVICON_ICO = base64.b64decode(
     "AAABAAEAICAAAAEAIAAWAAAAugAAAIlQTkcNChoKAAAADUlIRFIAAAAgAAAAIAgGAAAAc3p69AAAAIFJREFUeNpjENDS+j+QmGHUAaMOGLQO+PL8IBxTYgEhcxgIaaLEEcSYQ7QDoi+dJBkPXQcMeBqA4ec7YqiS0vGZM+qAoeEAch1CjP7RKBh1wKgDyHYAuhwpaqkWAsRWWBQ5AJdmUhotZDkAZvmAOICQ5XRzAKWNDYrTwGjHZEQ4AADDOIbrtrlaUAAAAABJRU5ErkJggg=="
 )
+ROOT_HTML = """<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MachBench MCP Server</title><link rel="icon" href="/favicon.ico">
+<style>body{margin:0;background:#102a2a;color:#f4e7c1;font:16px system-ui,sans-serif;display:grid;place-items:center;min-height:100vh}main{max-width:640px;padding:40px}h1{color:#e7b85c}code{color:#5bd2c9}</style></head>
+<body><main><h1>MachBench MCP Server</h1><p>The server is running.</p><p>Connect your MCP client to <code>/mcp</code>.</p><p>Health: <a href="/health">/health</a></p></main></body>
+</html>"""
 
 
 class PendingAgent(Agent):
@@ -348,7 +355,15 @@ class McpHttpRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self) -> None:
-        if self.path == "/health":
+        if self.path.rstrip("/") == "":
+            body = ROOT_HTML.encode()
+            self.send_response(HTTPStatus.OK)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+        elif self.path == "/health":
             self._send_json({"status": "ok", "server": "machbench"})
         elif self.path == "/favicon.ico":
             self.send_response(HTTPStatus.OK)
@@ -366,7 +381,7 @@ class McpHttpRequestHandler(BaseHTTPRequestHandler):
             self.send_header("Access-Control-Allow-Origin", "*")
             self.end_headers()
             self.wfile.write(body)
-        elif self.path.rstrip("/") in ("", "/mcp"):
+        elif self.path.rstrip("/") == "/mcp":
             self._send_json({
                 "status": "ok",
                 "server": "machbench",
