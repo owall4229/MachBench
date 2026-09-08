@@ -120,11 +120,12 @@ The repository includes [mcphosting.json](mcphosting.json). MCP Hosting should u
 
 ```json
 {
-	"command": "python3 -m machbench.mcp_server --http --host 0.0.0.0 --port $PORT"
+	"command": "exec python3 -m machbench.mcp_server --http --host 0.0.0.0 --port $PORT"
 }
 ```
 
 After deployment, use the hosting-provided URL with `/mcp` as the MCP endpoint.
+The `exec` ensures the hosting supervisor manages the Python process directly, and the server allows rapid socket reuse during restarts. Do not start a second copy manually on the same assigned `PORT`; stop the existing deployment first.
 
 Register this URL in the provider:
 

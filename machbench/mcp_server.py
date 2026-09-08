@@ -304,6 +304,7 @@ class McpHttpServer(ThreadingHTTPServer):
     """Streamable-HTTP-style MCP server with one application per session."""
 
     daemon_threads = True
+    allow_reuse_address = True
 
     def __init__(self, address: tuple[str, int], history_dir: str | Path = "history"):
         super().__init__(address, McpHttpRequestHandler)

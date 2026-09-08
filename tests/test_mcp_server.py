@@ -60,6 +60,7 @@ def test_mcp_advertises_machbench_tool_and_runs_session(tmp_path: Path):
 
 
 def test_http_transport_creates_isolated_session():
+    assert McpHttpServer.allow_reuse_address is True
     server = McpHttpServer(("127.0.0.1", 0))
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
