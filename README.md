@@ -114,6 +114,18 @@ python3 -m machbench.mcp_server --http --host 0.0.0.0 --port 8000
 
 Opening `http://YOUR_HOST:8000/` in Chrome shows a small server status page. The MCP client URL is still `http://YOUR_HOST:8000/mcp`; the browser page is only a health check and connection hint.
 
+### Deploying on MCP Hosting
+
+The repository includes [mcphosting.json](mcphosting.json). MCP Hosting should use its `command` field to start the HTTP transport. The server binds to `0.0.0.0` and reads the hosting platform's `PORT` variable automatically:
+
+```json
+{
+	"command": "python3 -m machbench.mcp_server --http --host 0.0.0.0 --port $PORT"
+}
+```
+
+After deployment, use the hosting-provided URL with `/mcp` as the MCP endpoint.
+
 Register this URL in the provider:
 
 ```text

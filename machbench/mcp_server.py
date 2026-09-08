@@ -11,6 +11,7 @@ import json
 import argparse
 import base64
 from datetime import datetime, timezone
+import os
 from pathlib import Path
 import sys
 import uuid
@@ -435,7 +436,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run MachBench as stdio or HTTP MCP server.")
     parser.add_argument("--http", action="store_true", help="serve MCP over HTTP instead of stdio")
     parser.add_argument("--host", default="127.0.0.1", help="HTTP bind host")
-    parser.add_argument("--port", type=int, default=8000, help="HTTP bind port")
+    parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8000")), help="HTTP bind port")
     parser.add_argument("--history-dir", default="history",
                         help="directory for JSONL session histories and final reports")
     args = parser.parse_args()
